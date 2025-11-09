@@ -1,59 +1,133 @@
 ---
 interface Item {
   title: string;
-  thumb: string;    // preview image
-  src?: string;     // local mp4 or external embed URL
-  embed?: "youtube" | "vimeo" | null;
+  thumb: string;           // preview image
+  src?: string;            // video id or full URL (see per-provider notes)
+  embed?: "youtube" | "vimeo" | "tiktok" | "instagram" | "facebook" | null; // null = local mp4
 }
 
-const { heading = "Highlights", items = [] as Item[], id = "highlights" } = Astro.props;
+const { heading = "Videos", items = [] as Item[], id = "videos" } = Astro.props;
 
-// Simple modal using <dialog>
-function modal(i: number) {
-  return `
-    (function(){
-      const d = document.getElementById('${id}-dlg-' + ${i});
-      d?.showModal();
-    })()
-  `;
-}
+/** Build iframe src per provider */
+const buildSrc = (it: Item) => {
+  if (!it.embed) return ""; // local mp4
+  if (it.embed === "youtube")   return `https://www.youtube.com/embed/${it.src}?autoplay=1&mute=1&rel=0`;
+  if (it.embed === "vimeo")     return `https://player.vimeo.com/video/${it.src}?autoplay=1&muted=1`;
+  if (it.embed === "tiktok")    return `https://www.tiktok.com/embed/v2/${it.src}`;
+  if (it.embed === "instagram") return `https://www.instagram.com/reel/${it.src}/embed`;
+  if (it.embed === "facebook")  return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(it.src || "")}&show_text=false&width=960`;
+  return "";
+};
 ---
+
 <section id={id} class="section">
   <div class="container">
     <h2 class="h2">{heading}</h2>
+
     <div class="grid grid-2">
-      {items.map((it, i) => (
+      {items.map((it, idx) => (
         <figure class="card" style="padding:12px">
-          <div class="media">
-            <img src={it.thumb} alt={it.title} loading="lazy" />
-            <button class="play" onclick={modal(i)}>▶ Play</button>
+          <div class="media" data-idx={idx} style="background:#111">
+            <!-- Preview -->
+            <button
+              class="vp-play"
+              style="
+                all:unset; cursor:pointer; display:block; width:100%; height:100%;
+                position:relative;
+              "
+              onclick={`(function(){
+                const wrap = document.currentScript?.parentElement || event.currentTarget.parentElement;
+                if(!wrap) return;
+
+                // If already swapped, do nothing
+                if (wrap.dataset.playing === '1') return;
+                wrap.dataset.playing = '1';
+
+                // Build player node
+                const provider = ${JSON.stringify(items)}[${idx}].embed;
+                const src      = "${buildSrc(it)}";
+                const isLocal  = ${JSON.stringify(!it.embed)};
+                let node;
+
+                if (isLocal) {
+                  node = document.createElement('video');
+                  node.src = ${JSON.stringify(it.src || "")};
+                  node.controls = true;
+                  node.autoplay = true;
+                  node.playsInline = true;
+                  node.muted = true;
+                  node.style.width = '100%';
+                  node.style.height = '100%';
+                  node.style.display = 'block';
+                } else {
+                  node = document.createElement('iframe');
+                  node.src = src;
+                  node.allow = 'autoplay; encrypted-media; clipboard-write; picture-in-picture; web-share';
+                  node.allowFullscreen = true;
+                  node.style.width = '100%';
+                  node.style.height = '100%';
+                  node.style.border = '0';
+                  node.style.display = 'block';
+                }
+
+                // Swap
+                wrap.innerHTML = '';
+                wrap.appendChild(node);
+
+                // Fallback if provider blocks iframe (timeout + onerror)
+                const fallbackUrl = (provider === 'facebook' || provider === 'instagram' || provider === 'tiktok')
+                  ? (${JSON.stringify(it.embed ? (it.embed === 'facebook' ? (it.src || '') : (it.embed === 'instagram' ? `https://www.instagram.com/reel/${it.src}` : `https://www.tiktok.com/@_/video/${it.src}`)) : '')})
+                  : '';
+
+                let opened = false;
+                const showFallback = () => {
+                  if (opened) return;
+                  opened = true;
+                  wrap.innerHTML = '';
+                  const fb = document.createElement('div');
+                  fb.style.cssText = 'display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;width:100%;height:100%;background:#000;border-radius:12px;color:#fff;padding:16px;text-align:center';
+                  fb.innerHTML = '<div style="opacity:.9">This video can’t be embedded here.<br/>Open it on the platform.</div>';
+                  const a = document.createElement('a');
+                  a.textContent = 'Open Video';
+                  a.className = 'btn';
+                  a.target = '_blank';
+                  a.rel = 'noopener';
+                  a.href = fallbackUrl || '#';
+                  fb.appendChild(a);
+                  wrap.appendChild(fb);
+                };
+
+                if (!isLocal) {
+                  // if the iframe doesn't load within 6s, show fallback
+                  const timer = setTimeout(showFallback, 6000);
+                  node.addEventListener?.('load', function(){
+                    clearTimeout(timer);
+                    // Some providers "load" but still block interaction; we let user control it.
+                  });
+                  node.addEventListener?.('error', function(){
+                    clearTimeout(timer);
+                    showFallback();
+                  });
+                }
+              })()`}>
+
+              <img
+                src={it.thumb}
+                alt={it.title}
+                loading="lazy"
+                style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.85)"
+              />
+              <span
+                style="
+                  position:absolute;left:12px;bottom:12px;
+                  background:rgba(0,0,0,.55); color:#fff; border-radius:999px;
+                  padding:8px 12px; font-weight:600; backdrop-filter:saturate(140%) blur(4px);
+                "
+              >▶ Play</span>
+            </button>
           </div>
+
           <figcaption style="margin-top:10px">{it.title}</figcaption>
-
-          <dialog id={`${id}-dlg-${i}`} style="border:0;border-radius:12px;padding:0;max-width:min(960px, 92vw)">
-            <div style="position:relative;background:#000">
-              <button onclick="this.closest('dialog').close()" style="position:absolute;top:8px;right:8px;border:0;background:#fff;border-radius:999px;padding:6px 10px;cursor:pointer">✕</button>
-
-              {it.embed === "youtube" && it.src && (
-                <iframe
-                  src={`https://www.youtube.com/embed/${it.src}?rel=0&autoplay=1`}
-                  allow="autoplay; encrypted-media" allowfullscreen
-                  style="width:min(960px, 92vw);height:calc(min(960px, 92vw)*9/16);border:0;border-radius:12px"></iframe>
-              )}
-
-              {it.embed === "vimeo" && it.src && (
-                <iframe
-                  src={`https://player.vimeo.com/video/${it.src}?autoplay=1`}
-                  allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
-                  style="width:min(960px, 92vw);height:calc(min(960px, 92vw)*9/16);border:0;border-radius:12px"></iframe>
-              )}
-
-              {(!it.embed && it.src) && (
-                <video src={it.src} controls autoplay playsinline
-                  style="width:min(960px, 92vw);height:calc(min(960px, 92vw)*9/16);border-radius:12px;display:block"></video>
-              )}
-            </div>
-          </dialog>
         </figure>
       ))}
     </div>

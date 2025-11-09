@@ -1,10 +1,10 @@
 :root{
   /* Dark-first palette */
-  --bg:#0f1113;
-  --paper:#14181d;
+  --bg:#06181f;
+  --paper:#06181f;
   --ink:#e9edf2;
   --muted:#9aa6b2;
-  --brand:#52e3c2;       /* fresh accent on dark */
+  --brand:#002a3e;       /* fresh accent on dark */
   --line:rgba(255,255,255,.08);
   --shadow:0 12px 36px rgba(0,0,0,.45);
 }
@@ -65,3 +65,26 @@ a:hover{text-decoration:underline}
   background:#000c; color:#fff; border:0; border-radius:999px; padding:10px 14px; cursor:pointer;
 }
 footer .links{display:flex; gap:16px; flex-wrap:wrap}
+
+.btn-dark {
+  background: #06181f;
+  color: #e9edf2;
+  border-radius: 999px;
+  padding: 10px 24px;
+  font-weight: 600;
+  display: inline-block;
+  transition: background .25s ease, transform .25s ease;
+}
+
+.btn-dark:hover {
+  background: #0a232b;
+  transform: translateY(-1px);
+}
+
+.btn-bg-soft {
+  background: rgba(6, 24, 31, 0.65);   /* #06181f with reduced opacity */
+}
+
+.btn-bg-soft:hover {
+  background: rgba(6, 24, 31, 0.85);   /* brighten on hover */
+}

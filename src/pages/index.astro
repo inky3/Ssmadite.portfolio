@@ -8,20 +8,57 @@ import GalleryGrid from "../components/GalleryGrid.astro";
 import SiteFooter from "../components/SiteFooter.astro";
 
 
-// Replace these assets later
-const highlights = [
-  { title: "Product Motion — 01", thumb: "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?q=80&w=1600&auto=format&fit=crop", src: "dQw4w9WgXcQ", embed: "youtube" },
-  { title: "Title Sequence — 02", thumb: "https://images.unsplash.com/photo-1603232644140-bb47da511b92?q=80&w=1600&auto=format&fit=crop", src: "76979871", embed: "vimeo" }
+// Showreel (YouTube)
+const showreel = [
+  { title: "Showreel", thumb: "https://img.youtube.com/vi/BbJx3A7IeIw/hqdefault.jpg", src: "BbJx3A7IeIw", embed: "youtube" }
 ];
 
-const graphics = [
-  { title: "Graphic Pair — A", thumb: "https://images.unsplash.com/photo-1529245019870-59b249281fd5?q=80&w=1600&auto=format&fit=crop", src: "/videos/clip-a.mp4" },
-  { title: "Graphic Pair — B", thumb: "https://images.unsplash.com/photo-1574169208507-84376144848b?q=80&w=1600&auto=format&fit=crop", src: "/videos/clip-b.mp4" }
+// VFX (TikTok + Instagram)
+const vfx = [
+  // Butterfly VFX – TikTok (video id from URL path)
+  { title: "Butterfly VFX", thumb: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1600&q=80&auto=format&fit=crop",
+    src: "7527248957894888722", embed: "tiktok" },
+
+  // HandFire – Instagram Reel (reel code)
+  { title: "HandFire", thumb: "https://images.unsplash.com/photo-1495567720989-cebdbdd97913?w=1600&q=80&auto=format&fit=crop",
+    src: "C6ivp8uSxm4", embed: "instagram" },
 ];
 
-const gallery = Array.from({length: 9}).map((_,i) => ({
-  src: `https://picsum.photos/seed/${i+11}/1200/800`
-}));
+// Motion Graphic (YouTube)
+const motionGraphic = [
+  { title: "Thesis Project | มาทำความรู้จักมะเร็งกัน", thumb: "https://img.youtube.com/vi/CWcmHnMQ5zo/hqdefault.jpg", src: "CWcmHnMQ5zo", embed: "youtube" },
+  { title: "Explainer | กราฟิกและมัลติมีเดีย เรียนอะไรบ้าง...", thumb: "https://img.youtube.com/vi/oFphW_3urwQ/hqdefault.jpg", src: "oFphW_3urwQ", embed: "youtube" },
+  { title: "Collage | สิ่งที่น่าสนใจในสมุทรสาคร", thumb: "https://img.youtube.com/vi/WG9YM0V7YYI/hqdefault.jpg", src: "WG9YM0V7YYI", embed: "youtube" },
+  { title: "PHOTO CURATION | COVER นิทาน - Musketeers", thumb: "https://img.youtube.com/vi/ZTglD4rBufo/hqdefault.jpg", src: "ZTglD4rBufo", embed: "youtube" },
+  { title: "Animation 3D | Medical Mask", thumb: "https://img.youtube.com/vi/TjJg4J0Y7Hg/hqdefault.jpg", src: "TjJg4J0Y7Hg", embed: "youtube" },
+];
+
+// Mograph (TikTok)
+const mograph = [
+  { title: "Mograph", thumb: "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=1600&q=80&auto=format&fit=crop",
+    src: "7559413987583085831", embed: "tiktok" },
+];
+
+// Video Editor (YouTube + Facebook)
+const videoEditor = [
+  { title: "ไพ่ สุ่ม เสว", thumb: "https://img.youtube.com/vi/cZ5ExFDlJbo/hqdefault.jpg", src: "cZ5ExFDlJbo", embed: "youtube" },
+
+  // Facebook items (use full URL)
+  { title: "Villares Rama 2", thumb: "https://images.unsplash.com/photo-1522199710521-72d69614c702?w=1600&q=80&auto=format&fit=crop",
+    src: "https://www.facebook.com/groups/samutsakhon.news/permalink/5599964576697831/?rdid=K2UIwZjgmInZvmAe", embed: "facebook" },
+
+  { title: "Sena Kith (clip 1)", thumb: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1600&q=80&auto=format&fit=crop",
+    src: "https://www.facebook.com/share/v/1BfwSuF4m8/", embed: "facebook" },
+
+  { title: "Sena Kith (clip 2)", thumb: "https://images.unsplash.com/photo-1505238680356-667803448bb6?w=1600&q=80&auto=format&fit=crop",
+    src: "https://www.facebook.com/share/v/16RYyVFHPL/", embed: "facebook" },
+
+  { title: "รีวิวอาหารรอบ มอ (clip 1)", thumb: "https://images.unsplash.com/photo-1466979939565-131c4b39a51a?w=1600&q=80&auto=format&fit=crop",
+    src: "https://www.facebook.com/share/v/17M2E3vSG9/", embed: "facebook" },
+
+  { title: "รีวิวอาหารรอบ มอ (clip 2)", thumb: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=1600&q=80&auto=format&fit=crop",
+    src: "https://www.facebook.com/share/v/17gdzUH24m/", embed: "facebook" },
+];
 ---
 
 <html lang="en">
@@ -40,9 +77,11 @@ const gallery = Array.from({length: 9}).map((_,i) => ({
     <SiteHeader />
     <Hero />
     <ResumeBand />
-    <VideoPair id="highlights" heading="Highlights (2 clips)" items={highlights} />
-    <VideoPair id="graphics" heading="Graphics (paired clips)" items={graphics} />
-    <GalleryGrid id="gallery" heading="Gallery" items={gallery} />
+      <VideoPair id="showreel" heading="Showreel" items={showreel} />
+      <VideoPair id="vfx" heading="VFX" items={vfx} />
+      <VideoPair id="motion" heading="Motion Graphic" items={motionGraphic} />
+      <VideoPair id="mograph" heading="Mograph" items={mograph} />
+      <VideoPair id="editor" heading="Video Editor" items={videoEditor} />
     <SiteFooter />
   </body>
 </html>
